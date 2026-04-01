@@ -103,7 +103,7 @@ def scrape_speech_text(url):
     
     soup = BeautifulSoup(response.content, "html.parser")
     # New format (2006-present)
-    article = soup.select_one("article")
+    article = soup.select_one("#article")
     if article:
         return article.get_text(separator=" ", strip = True)
     
@@ -148,11 +148,7 @@ def scrape_all_texts(df, checkpoint_file = "fed_speeches.csv", checkpoint_interv
             combined = pd.concat([existing, temp_df], ignore_index=True)
             combined.to_csv(checkpoint_file, index=False)
             print(f"Checkpoint saved with {len(combined)} total speeches.")
-        time.sleep(2)
-    # extended break every 100 requests
-        if len(results) % 100 == 0:
-            print("Taking a longer break...")
-            time.sleep(30)
+        time.sleep(1)
 
     final_df = pd.concat([existing,
                           pd.DataFrame(results)], 
@@ -161,5 +157,24 @@ def scrape_all_texts(df, checkpoint_file = "fed_speeches.csv", checkpoint_interv
     print(f"Scraping complete. Total speeches saved: {len(final_df)}")
     return final_df
 
-df_index = scrape_speech_index(range(1996, 2025))
+def retry_failed(checkpoint_file = "fed_speeches.csv"):
+    df = pd.read_csv(checkpoint_file)
+    failed = df[df['text'].isna()]
+    print(f"Retrying {len(failed)} failed speeches...")
+
+    for i, row in failed.iterrows():
+        text = scrape_speech_text(row['url'])
+
+        if text:
+            df.at[i, 'text'] = text
+            print(f"Successfully retrieved text for {row['url']}")
+        else:
+            print(f'Failed again for {row["url"]}')
+        time.sleep(1)
+
+    df.to_csv(checkpoint_file, index=False)
+    print(f"Done. Remaining Failures: {df['text'].isna().sum()}")
+    return df
+
+df_index = scrape_speech_index(range(1996, 2024))
 df_full = scrape_all_texts(df_index)
