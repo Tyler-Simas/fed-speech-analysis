@@ -1,0 +1,11 @@
+# data files
+*.csv
+*.json
+
+# python
+__pycache__/
+*.pyc
+.env
+
+# jupyter
+.ipynb_checkpoints/
