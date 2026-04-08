@@ -9,3 +9,7 @@ __pycache__/
 
 # jupyter
 .ipynb_checkpoints/
+
+# model weights
+gpt2-finetuned-fedspeeches/
+logs/

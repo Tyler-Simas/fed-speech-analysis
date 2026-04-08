@@ -107,14 +107,25 @@ def scrape_speech_text(url):
     if article:
         return article.get_text(separator=" ", strip = True)
     
-    # Old format (Before 2006)
-    table = soup.find("table", {"width": "600"})
-    if table:
-        return table.get_text(separator=" ", strip = True)
-
+    # old format — try longest table first
+    tables = soup.find_all("table", {"width": "600"})
+    if tables:
+        texts = [t.get_text(separator=" ", strip=True) for t in tables]
+        longest = max(texts, key=len)
+        if len(longest) > 1000:
+            return longest
+    
+    # fallback — just grab everything in #content and strip navigation
+    content = soup.select_one("#content")
+    if content:
+        # remove known boilerplate elements
+        for el in content.select("a, img, script, style"):
+            el.decompose()
+        return content.get_text(separator=" ", strip=True)
+    
     return None
 
-def scrape_all_texts(df, checkpoint_file = "fed_speeches.csv", checkpoint_interval = 10):
+def scrape_all_texts(df, checkpoint_file = "data/fed_speeches.csv", checkpoint_interval = 10):
     # Load existing progress if checkpoint exists
     if os.path.exists(checkpoint_file):
         existing = pd.read_csv(checkpoint_file)
@@ -157,7 +168,7 @@ def scrape_all_texts(df, checkpoint_file = "fed_speeches.csv", checkpoint_interv
     print(f"Scraping complete. Total speeches saved: {len(final_df)}")
     return final_df
 
-def retry_failed(checkpoint_file = "fed_speeches.csv"):
+def retry_failed(checkpoint_file = "data/fed_speeches.csv"):
     df = pd.read_csv(checkpoint_file)
     failed = df[df['text'].isna()]
     print(f"Retrying {len(failed)} failed speeches...")
@@ -176,5 +187,24 @@ def retry_failed(checkpoint_file = "fed_speeches.csv"):
     print(f"Done. Remaining Failures: {df['text'].isna().sum()}")
     return df
 
-df_index = scrape_speech_index(range(1996, 2024))
-df_full = scrape_all_texts(df_index)
+def retry_short(checkpoint_file = "data/fed_speeches.csv", min_length = 1000):
+    df = pd.read_csv(checkpoint_file)
+
+    short = df[df['text'].notna() & (df['text'].str.len() < min_length)]
+    print(f"Retrying {len(short)} speeches with text shorter than {min_length} characters...")
+
+    for i, row in short.iterrows():
+        text = scrape_speech_text(row['url'])
+
+        if text and len(text) >= min_length:
+            df.at[i, 'text'] = text
+            print(f"Successfully retrieved longer text for {row['url']}")
+        else:
+            print(f'Failed to retrieve longer text for {row["url"]}')
+        time.sleep(1)
+
+    df.to_csv(checkpoint_file, index=False)
+    print(f"Done. Remaining Short Texts: {(df['text'].fillna("").apply(len) < min_length).sum()}")
+    return df
+
+df_full = retry_short()
