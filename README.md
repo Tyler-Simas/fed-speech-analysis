@@ -19,7 +19,7 @@ Speeches during the 2008-2009 financial crisis show remarkably higher perplexity
 
 ### **3. Perplexity correlates with future market returns**
 
-Same-day volatility showed no significant correlation (p=0.13). 21-day and 180-day forward returns, however, hsowed statistically significant correlations (R^2=0.01, p<0.001), suggesting that perplexity shows weak but reliable information about market returns.
+Same-day volatility showed no significant correlation (p=0.13). 21-day and 180-day forward returns, however, hsowed statistically significant correlations (R^2=0.01, p<0.001), suggesting that perplexity shows weak but reliable information about market volatility.
 
 --- 
 ## :computer: Visualizations
@@ -78,7 +78,7 @@ Fine-tuned GPT-2 (124M parameters) using LoRA (r=16, target modules: c_attn and 
 Computed per-speech perplexity using the fine-tuned model as a measure of linguistic oddity. A lower perplexity means the model finds the speech predictable, while a higher perplexity means the speech is linguistically surprising to the model.
 
 **Market Correlation**
-Merged speech dates with S&P 500 daily returns (adjusting for holidays and weekends) and tested correlations across 1-day, 5-day, 10-day, 21-day, 90-day, and 180-day windows.
+Merged speech dates with S&P 500 daily close (adjusting for holidays and weekends) and tested correlations across 1-day, 5-day, 10-day, 21-day, 90-day, and 180-day windows.
 
 ## Future Work
 - Test with larget models
