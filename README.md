@@ -3,9 +3,9 @@ Fine-Tuning GPT-2 on 1,700+ Federal Reserve speeches (1996-2023) to model centra
 
 
 ## 🔰: Overview
-Central banks communicate carefully, every word in a speech is chosen deliberately - but some speeches are more linguistically unusual than others. This project investigates the question: can a fine-tuned language model detect when the Fed is saying something unexpected, and does that translate to unusualness in market movements?
+Central banks communicate carefully, every word in a speech is chosen deliberately - but some speeches are more linguistically unusual than others. This project investigates the question: can a fine-tuned language model detect when the Fed is saying something unexpected, and does that translate to volatility in the market?
 
-To answer this, I scraped every publicly available Fed speech from 1996 - 2023, fine-tuned GPT-2 on the corpus using LoRA, and measured per-speech perplexity as a proxy for linguistic abnormalities. I then correlated these perplexity scores against S&P 500 returns across multiple time horizons.
+To answer this I scraped every publicly available Fed speech from 1996 - 2023, fine-tuned GPT-2 on the corpus using LoRA, and measured per-speech perplexity as a proxy for linguistic abnormalities. I then correlated these perplexity scores against S&P 500 forward and backward returns across 1, 5, 90, and 180 day time horizons.
 
 ## :zap: Key Findings
 
